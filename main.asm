@@ -37,19 +37,21 @@
 start:
     sei                  ; no KERNAL IRQ - raster polling must not jitter
 
-    ; LCD look: black bezel border, pale screen, black artwork
+    ; sunny scene: black frame, sky above the horizon split
     lda #BLACK
     sta BORDER
-    lda #LGREY
+    lda #COL_SKY
     sta BG
 
-    ; sprites: all black, hires, in front of the characters
+    ; sprites: red scooter, white rabbits, hires, in front
+    lda #RED
+    sta SPR_COL
     ldx #7
 sprcol:
-    lda #BLACK
+    lda #WHITE
     sta SPR_COL,x
     dex
-    bpl sprcol
+    bne sprcol
     lda #0
     sta SPR_EN
     sta SPR_MC
@@ -72,9 +74,17 @@ sprcol:
 ; ============================================================
 main:
     jsr wait_frame
+    lda #COL_SKY         ; repaint the sky while the beam is off screen
+    sta BG
     inc framectr
     jsr rand8            ; stir the RNG once per frame
-    jsr call_update
+    jsr call_update      ; finishes long before the horizon line
+wait_grass:
+    lda RASTER           ; split the background at the horizon:
+    cmp #RAS_SPLIT       ;   sky above, grass below
+    bne wait_grass
+    lda #COL_GRASS
+    sta BG
     jmp main
 
 call_update:

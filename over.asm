@@ -26,18 +26,27 @@ oi_row:
     lda mul40hi,y
     adc #>SCREEN
     sta scrhi
+    sta colhi            ; color RAM pointer for the same cells
+    lda scrlo
+    sta collo
+    lda colhi
+    clc
+    adc #$d4
+    sta colhi
     ldy #BOXW-1
 oi_col:
     jsr box_char
     sta (scrlo),y
+    lda #WHITE
+    sta (collo),y
     dey
     bpl oi_col
     inx
     cpx #5
     bne oi_row
 
-    +prtext BOXROW+1, 15, BLACK, txt_over, 9
-    +prtext BOXROW+2, 15, BLACK, txt_score, 5
+    +prtext BOXROW+1, 15, WHITE, txt_over, 9
+    +prtext BOXROW+2, 15, WHITE, txt_score, 5
 
     ; final score digits next to the label
     lda sc_d0
@@ -49,6 +58,10 @@ oi_col:
     lda sc_d2
     ora #48
     sta SCREEN+(BOXROW+2)*40+23
+    lda #YELLOW
+    sta COLRAM+(BOXROW+2)*40+21
+    sta COLRAM+(BOXROW+2)*40+22
+    sta COLRAM+(BOXROW+2)*40+23
 
     +setupd over_update
     rts
@@ -100,10 +113,10 @@ over_update:
     lda framectr
     and #32
     bne ou_hide
-    +prtext BOXROW+3, 14, BLACK, txt_retry, 12
+    +prtext BOXROW+3, 14, YELLOW, txt_retry, 12
     jmp ou_start
 ou_hide:
-    +prtext BOXROW+3, 14, BLACK, txt_blank, 12
+    +prtext BOXROW+3, 14, YELLOW, txt_blank, 12
 ou_start:
     jsr start_edge
     beq ou_done

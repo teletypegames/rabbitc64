@@ -8,11 +8,17 @@ title_init:
     jsr clear_screen
     jsr draw_road
 
-    +prbig 1, 8, BLACK, txt_rabbit, 6
-    +prtext 6, 16, BLACK, txt_scooter, 7
-    +prtext 17, 4, BLACK, txt_info, 31
+    +prbig 1, 8, RED, txt_rabbit, 6
+    +prtext 6, 16, WHITE, txt_scooter, 7
+    +prtext 17, 4, WHITE, txt_info, 31
 
-    ; one parked scooter per lane on sprites 0-4
+    ; one parked scooter per lane on sprites 0-4, all in red
+    ldx #4
+ti_col:
+    lda #RED
+    sta SPR_COL,x
+    dex
+    bne ti_col
     ldx #4
 ti_scoot:
     txa
@@ -80,10 +86,10 @@ tu_pos:
     lda framectr
     and #32
     bne tu_hide
-    +prtext 15, 10, BLACK, txt_press, 19
+    +prtext 15, 10, YELLOW, txt_press, 19
     jmp tu_start
 tu_hide:
-    +prtext 15, 10, BLACK, txt_blank, 19
+    +prtext 15, 10, YELLOW, txt_blank, 19
 tu_start:
     jsr start_edge
     beq tu_done

@@ -21,6 +21,9 @@ in the original.
 
 - PAL frame loop synced by polling the raster beam (no interrupts), one
   state update per frame — title, play and game over are `updvec` states.
+- The background is raster-split at the horizon: sky above, grass below.
+  The road is a grey wedge of inverse-space characters between painted
+  white edge lines, with trees along both shoulders.
 - The player is hardware sprite 0; up to seven rabbits live on sprites
   1–7. Rabbits follow the road's perspective: a linear y ramp and a t²
   horizontal fan-out, both precomputed into tables at assembly time

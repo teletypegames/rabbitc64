@@ -46,46 +46,125 @@ pt_loop:
     bne pt_loop
     rts
 
-; ---- the road: two diagonals from the horizon apex down to
-; the screen corners, plus a tree on the left shoulder ----
-draw_road:
-    ldx #0
-dr_loop:
-    txa
-    clc
-    adc #6               ; road runs from char row 6 to row 24
-    tay
-    lda mul40lo,y
+; ---- set scrlo/hi + collo/hi to the start of char row X ----
+row_ptr:
+    lda mul40lo,x
     sta scrlo
-    lda mul40hi,y
+    sta collo
+    lda mul40hi,x
     clc
     adc #>SCREEN
     sta scrhi
+    clc
+    adc #$d4             ; COLRAM - SCREEN high byte distance
+    sta colhi
+    rts
+
+; ---- the road: grey surface between two painted edge lines,
+; from the horizon apex down to the screen corners, then the
+; trees along both shoulders ----
+draw_road:
+    ldx #0
+dr_loop:
     stx drtmp
+    txa
+    clc
+    adc #6               ; road runs from char row 6 to row 24
+    tax
+    jsr row_ptr
     lda #19              ; left edge: one column left per row
     sec
     sbc drtmp
     tay
+    sty drleft
     lda #$4e             ; '/' diagonal
     sta (scrlo),y
+    lda #COL_EDGE
+    sta (collo),y
     lda #20              ; right edge: one column right per row
     clc
     adc drtmp
     tay
     lda #$4d             ; '\' diagonal
     sta (scrlo),y
+    lda #COL_EDGE
+    sta (collo),y
+    dey                  ; fill the surface between the edges
+dr_fill:
+    cpy drleft
+    beq dr_rowdone
+    lda #$a0             ; inverse space: solid block
+    sta (scrlo),y
+    lda #COL_ROAD
+    sta (collo),y
+    dey
+    jmp dr_fill
+dr_rowdone:
+    ldx drtmp
     inx
     cpx #19
     bne dr_loop
-    ; tree on the left shoulder
-    lda #$51             ; ball
-    sta SCREEN+10*40+3
-    sta SCREEN+11*40+2
-    sta SCREEN+11*40+3
-    sta SCREEN+11*40+4
-    lda #$5d             ; trunk
-    sta SCREEN+12*40+3
+; falls through: the roadside trees
+draw_trees:
+    lda #0
+    sta ttidx
+dt_loop:
+    ldx ttidx
+    lda tree_tbl,x
+    sta trow
+    lda tree_tbl+1,x
+    sta tcol
+    jsr draw_tree
+    inc ttidx
+    inc ttidx
+    lda ttidx
+    cmp #NTREES*2
+    bne dt_loop
     rts
+
+; ---- one tree: crown of balls on trow, top ball above,
+; trunk below (trow/tcol = middle row, left column) ----
+draw_tree:
+    ldx trow
+    dex
+    jsr row_ptr
+    ldy tcol
+    iny
+    jsr tree_ball
+    ldx trow
+    jsr row_ptr
+    ldy tcol
+    jsr tree_ball
+    iny
+    jsr tree_ball
+    iny
+    jsr tree_ball
+    ldx trow
+    inx
+    jsr row_ptr
+    ldy tcol
+    iny
+    lda #$5d             ; trunk
+    sta (scrlo),y
+    lda #BROWN
+    sta (collo),y
+    rts
+
+tree_ball:
+    lda #$51             ; foliage ball
+    sta (scrlo),y
+    lda #LGREEN
+    sta (collo),y
+    rts
+
+NTREES = 6
+tree_tbl:                ; middle row, left column - far trees sit
+    !byte  9,  4         ;   higher and closer to the road
+    !byte 14,  6
+    !byte 19,  3
+    !byte  8, 31
+    !byte 12, 34
+    !byte 17, 36
 
 ; ---- input ----
 
@@ -488,6 +567,10 @@ rowidx:    !byte 0
 bitcnt:    !byte 0
 curbits:   !byte 0
 drtmp:     !byte 0       ; draw_road internals
+drleft:    !byte 0
+ttidx:     !byte 0       ; draw_trees internals
+trow:      !byte 0
+tcol:      !byte 0
 rslot:     !byte 0       ; rab_pos internals
 rt:        !byte 0
 rlane:     !byte 0

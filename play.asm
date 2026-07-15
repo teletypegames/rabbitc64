@@ -35,6 +35,17 @@ pi_clr:
     lda #2               ; start in the middle lane
     sta player_lane
 
+    ; sprite colors back to red scooter + white rabbits
+    ; (the title borrows sprites 1-4 as red scooters)
+    ldx #7
+pi_col:
+    lda #WHITE
+    sta SPR_COL,x
+    dex
+    bne pi_col
+    lda #RED
+    sta SPR_COL
+
     ; player sprite: scooter, fixed row, rabbits come per frame
     lda #SPRP_SCOOT
     sta SPRPTR
@@ -266,6 +277,8 @@ add_miss:
     ldy miss             ; Y: the rabbit loop still needs X
     lda #24              ; 'x'
     sta SCREEN+34,y      ; marks land on columns 35-37
+    lda #RED
+    sta COLRAM+34,y
     lda #12
     sta flash
     rts

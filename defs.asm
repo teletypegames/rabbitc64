@@ -28,7 +28,24 @@ SPR_COL  = $d027         ; sprite 0 color, +1 = sprite 1, ...
 ; ---- colors ----
 BLACK   = 0
 WHITE   = 1
+RED     = 2
+CYAN    = 3
+GREEN   = 5
+BLUE    = 6
+YELLOW  = 7
+ORANGE  = 8
+BROWN   = 9
+DGREY   = 11
+MGREY   = 12
+LGREEN  = 13
+LBLUE   = 14
 LGREY   = 15
+
+; ---- scene palette ----
+COL_SKY   = LBLUE        ; background above the horizon
+COL_GRASS = GREEN        ; background below it
+COL_ROAD  = MGREY        ; road surface (inverse-space fill)
+COL_EDGE  = WHITE        ; painted road edge lines
 
 ; ---- joystick port 2 bits (after read_joy, active high) ----
 JOY_LEFT  = 4
@@ -46,6 +63,7 @@ T_EXP     = 192          ; ... and where the sprite gets double-sized
 REP_HOLD  = 12           ; frames before a held direction auto-repeats
 REP_PERIOD = 6           ; frames between auto-repeat steps
 RAS_SYNC  = 251          ; raster line polled for the frame sync
+RAS_SPLIT = 97           ; horizon line: sky/grass background split
 
 ; ---- zero page pointers (same slots as the c64-demo) ----
 txtlo  = $f5             ; text pointer for the print routines (2 bytes)

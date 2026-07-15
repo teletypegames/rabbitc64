@@ -533,12 +533,13 @@ bigglyphs:
     !byte 5, 5, 2, 2, 2          ; 15 Y
     !byte 3, 4, 5, 5, 7          ; 16 G
     !byte 6, 5, 6, 5, 6          ; 17 B
+    !byte 5, 5, 5, 5, 2          ; 18 V
 
 bigmap:                  ; screen code (a=1..z=26) -> glyph index
     !byte  0             ; (unused)
     !byte  1, 17,  2,  3,  4,  5, 16,  0,  6,  0   ; a-j
     !byte  0,  7,  8,  9, 10, 11,  0, 12, 13, 14   ; k-t
-    !byte  0,  0,  0,  0, 15,  0                   ; u-z
+    !byte  0, 18,  0,  0, 15,  0                   ; u-z
 
 ; ---- texts (screen codes) ----
 txt_score:   !scr "score"

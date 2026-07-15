@@ -1,90 +1,69 @@
 ; -----------------------------------------------------------
-; title.asm - big RABBIT logo over the road, scooters parked
-; on all five lanes, three demo rabbits hopping in, blinking
-; "press fire to start"
+; title.asm - full-screen menu card: big RABBIT / SCOOTER
+; logo flanked by two hopping rabbits, the scooter waiting at
+; the bottom, blinking "fire = start game"
 ; -----------------------------------------------------------
 
 title_init:
-    lda #COL_SKY         ; back from the intro's black screen
+    lda #BLACK           ; the menu plays on a black screen
     sta bg_top
-    lda #COL_GRASS
     sta bg_bot
     jsr clear_screen
-    jsr draw_road
 
-    +prbig 1, 8, RED, txt_rabbit, 6
-    +prtext 6, 16, WHITE, txt_scooter, 7
-    +prtext 17, 8, WHITE, txt_info, 23
+    +prbig 2, 8, RED, txt_rabbit, 6
+    +prbig 8, 6, WHITE, txt_scooter, 7
+    +prtext 18, 8, WHITE, txt_info, 23
 
-    ; one parked scooter per lane on sprites 0-4, all in red
-    ldx #4
-ti_col:
+    ; decoration: white rabbits flank the logo (sprites 1-2,
+    ; double-sized), the red scooter waits at the bottom
     lda #RED
-    sta SPR_COL,x
-    dex
-    bne ti_col
-    ldx #4
-ti_scoot:
-    txa
-    asl
-    tay
-    lda pxlo,x
-    sta SPRPOS,y
-    lda #PLAYER_SY
-    sta SPRPOS+1,y
+    sta SPR_COL
+    lda #WHITE
+    sta SPR_COL+1
+    sta SPR_COL+2
     lda #SPRP_SCOOT
-    sta SPRPTR,x
-    dex
-    bpl ti_scoot
-    lda #0
+    sta SPRPTR
+    lda #172             ; center lane position
+    sta SPRPOS
+    lda #210
+    sta SPRPOS+1
+    lda #30              ; left rabbit
+    sta SPRPOS+2
+    lda #66
+    sta SPRPOS+3
+    sta SPRPOS+5
+    lda #34              ; right rabbit: x = 290, MSB below
+    sta SPRPOS+4
+    lda #%00000100
+    sta SPR_MSBX
+    lda #%00000110       ; both rabbits double-sized
     sta SPR_XEX
     sta SPR_YEX
-
-    ; demo rabbits on slots 4-6 (sprites 5-7), staggered starts
-    ldx #4
-ti_demo:
-    jsr rand5
-    sta r_lane,x
-    lda demo_t-4,x
-    sta r_thi,x
-    lda #1
-    sta r_act,x
-    inx
-    cpx #NRABBITS
-    bne ti_demo
+    lda #%00000111
+    sta SPR_EN
 
     +setupd title_update
     rts
 
 title_update:
-    ; shadows: five scooters (lane 4 needs the x MSB), no expand
-    lda #%00011111
-    sta en_sh
-    lda #%00010000
-    sta msb_sh
-    lda #0
-    sta xex_sh
-    sta yex_sh
-
-    ; demo rabbits: constant lope, respawn on a random lane
-    ldx #4
-tu_rab:
-    lda r_thi,x
+    ; hop the flanking rabbits through the big frames,
+    ; half a cycle apart
+    lda framectr
+    lsr
+    lsr
+    lsr
+    and #3
+    sta rtmp
     clc
-    adc #3
-    sta r_thi,x
-    bcc tu_pos
-    lda #0
-    sta r_thi,x
-    jsr rand5
-    sta r_lane,x
-tu_pos:
-    jsr rab_pos
-    inx
-    cpx #NRABBITS
-    bne tu_rab
-
-    jsr write_shadows
+    adc #SPRP_BIG
+    sta SPRPTR+1
+    lda rtmp
+    clc
+    adc #2
+    and #3
+    clc
+    adc #SPRP_BIG
+    sta SPRPTR+2
 
     ; blink the start line
     lda framectr
@@ -93,14 +72,10 @@ tu_pos:
     +prtext 15, 11, YELLOW, txt_press, 17
     jmp tu_start
 tu_hide:
-    lda #9               ; hide: repaint road row 15 over the text
-    sta drtmp
-    jsr road_row
+    +prtext 15, 11, YELLOW, txt_blank, 17
 tu_start:
     jsr start_edge
     beq tu_done
     jmp play_init        ; its rts returns to the main loop
 tu_done:
     rts
-
-demo_t: !byte 0, 85, 170

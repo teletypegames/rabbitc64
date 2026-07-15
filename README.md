@@ -10,12 +10,18 @@ that passes in any other lane is a **point**. Three misses end the round.
 The spawn rate and the rabbits' speed ramp up with your score, just like
 in the original.
 
+In **multiplayer** the rabbits still spawn on their own, but player 2
+steers the closest one left and right, trying to run the scooter down.
+
 ## Controls
 
 | Input | Action |
 |-------|--------|
-| Joystick port 2 left/right, or `A` / `D` | change lane (auto-repeats while held) |
-| Fire (or `SPACE`) | start / retry |
+| Menu: joystick up/down, or the `S` / `M` keys | pick single player / multiplayer |
+| Menu: fire (or `SPACE`); the `1` / `2` keys pick and start at once | start the picked mode |
+| P1: joystick port 2 left/right, or `A` / `D` | move the scooter (auto-repeats while held) |
+| P2: joystick port 1 left/right, or `J` / `L` | steer the closest rabbit (multiplayer) |
+| Fire (or `SPACE`) | start; on the game over screen: back to the menu |
 
 ## How it works
 

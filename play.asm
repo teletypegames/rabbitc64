@@ -27,6 +27,8 @@ play_init:
     sta spawnt
     sta lcnt
     sta rcnt
+    sta p2lcnt
+    sta p2rcnt
     jsr draw_score
 
     lda #0               ; draw_score leaves a digit code in A
@@ -113,6 +115,52 @@ pu_rrel:
     sta rcnt
 pu_rend:
 
+    ; -- multiplayer: player 2 steers the closest rabbit --
+    lda mp_mode
+    beq pu_nop2
+    jsr read_joy2
+    lda joyb2
+    and #JOY_LEFT
+    beq pu_p2lrel
+    inc p2lcnt
+    lda p2lcnt
+    cmp #1
+    beq pu_p2lmove
+    cmp #REP_HOLD+REP_PERIOD
+    bne pu_p2lend
+    lda #REP_HOLD
+    sta p2lcnt
+pu_p2lmove:
+    lda #$ff             ; one lane to the left
+    sta rtmp2
+    jsr steer_closest
+    jmp pu_p2lend
+pu_p2lrel:
+    lda #0
+    sta p2lcnt
+pu_p2lend:
+    lda joyb2
+    and #JOY_RIGHT
+    beq pu_p2rrel
+    inc p2rcnt
+    lda p2rcnt
+    cmp #1
+    beq pu_p2rmove
+    cmp #REP_HOLD+REP_PERIOD
+    bne pu_p2rend
+    lda #REP_HOLD
+    sta p2rcnt
+pu_p2rmove:
+    lda #1               ; one lane to the right
+    sta rtmp2
+    jsr steer_closest
+    jmp pu_p2rend
+pu_p2rrel:
+    lda #0
+    sta p2rcnt
+pu_p2rend:
+pu_nop2:
+
     ; -- shadow init: player sprite bit + its x MSB --
     ldx player_lane
     lda pxlo,x
@@ -195,6 +243,36 @@ pu_rnext:
     bcc pu_done
     jmp over_init        ; its rts returns to the main loop
 pu_done:
+    rts
+
+; ---- shift the closest live rabbit's lane by rtmp2 (+/-1) ----
+steer_closest:
+    ldx #$ff             ; best slot so far
+    lda #0
+    sta rtmp             ; best t so far
+    ldy #NRABBITS-1
+stc_find:
+    lda r_act,y
+    beq stc_next
+    lda r_thi,y
+    cmp rtmp
+    bcc stc_next
+    sta rtmp
+    tya
+    tax
+stc_next:
+    dey
+    bpl stc_find
+    cpx #$ff
+    beq stc_done         ; no rabbit on the road
+    lda r_lane,x
+    clc
+    adc rtmp2
+    bmi stc_done         ; already on the leftmost lane
+    cmp #LANES
+    bcs stc_done         ; ... or the rightmost one
+    sta r_lane,x
+stc_done:
     rts
 
 ; ---- claim a free rabbit slot and roll its lane + speed ----
@@ -298,6 +376,8 @@ flash:       !byte 0     ; frames left of the post-hit blink
 spawnt:      !byte 0     ; frames since the last spawn
 lcnt:        !byte 0     ; held-direction counters for the auto-repeat
 rcnt:        !byte 0
+p2lcnt:      !byte 0     ; the same for player 2's steering
+p2rcnt:      !byte 0
 
 ; ---- rabbit slots (hardware sprites 1-7) ----
 r_act:  !fill NRABBITS, 0

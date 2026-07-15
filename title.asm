@@ -1,7 +1,7 @@
 ; -----------------------------------------------------------
 ; title.asm - full-screen menu card: big RABBIT / SCOOTER
-; logo flanked by two hopping rabbits, the scooter waiting at
-; the bottom, blinking "fire = start game"
+; logo flanked by two hopping rabbits, single/multiplayer
+; picker (joystick up/down + fire, or the 1 / 2 keys)
 ; -----------------------------------------------------------
 
 title_init:
@@ -12,7 +12,8 @@ title_init:
 
     +prbig 2, 8, RED, txt_rabbit, 6
     +prbig 8, 6, WHITE, txt_scooter, 7
-    +prtext 18, 8, WHITE, txt_info, 23
+    +prtext 18, 9, LGREY, txt_info, 21
+    +prtext 19, 9, LGREY, txt_info2, 21
 
     ; decoration: white rabbits flank the logo (sprites 1-2,
     ; double-sized), the red scooter waits at the bottom
@@ -65,17 +66,99 @@ title_update:
     adc #SPRP_BIG
     sta SPRPTR+2
 
-    ; blink the start line
+    ; joystick up/down picks the mode
+    jsr read_joy
+    lda joyb
+    and #1               ; up
+    beq tu_noup
+    lda #0
+    sta mp_mode
+tu_noup:
+    lda joyb
+    and #2               ; down
+    beq tu_nodown
+    lda #1
+    sta mp_mode
+tu_nodown:
+
+    ; the 's' / 'm' keys pick the mode (fire still starts)
+    lda #$fd             ; 's': keyboard column 1, row bit 5
+    sta CIA1_PA
+    lda CIA1_PB
+    and #$20
+    bne tu_nos
+    lda #0
+    sta mp_mode
+tu_nos:
+    lda #$ef             ; 'm': keyboard column 4, row bit 4
+    sta CIA1_PA
+    lda CIA1_PB
+    and #$10
+    bne tu_nom
+    lda #1
+    sta mp_mode
+tu_nom:
+
+    ; the 1 / 2 keys pick and start right away (edge detected)
+    lda #$7f             ; keyboard column 7: '1' = bit 0, '2' = bit 3
+    sta CIA1_PA
+    lda CIA1_PB
+    and #$09
+    cmp #$09
+    beq tu_keyup         ; neither key held
+    ldx k12held
+    bne tu_menu          ; still held from an earlier frame
+    inx
+    stx k12held
+    and #$01
+    bne tu_key2
+    lda #0
+    sta mp_mode
+    jmp title_go
+tu_key2:
+    lda #1
+    sta mp_mode
+    jmp title_go
+tu_keyup:
+    lda #0
+    sta k12held
+tu_menu:
+
+    ; the two options: the picked line is yellow
+    lda mp_mode
+    bne tm_multi
+    +prtext 14, 14, YELLOW, txt_1p, 13
+    +prtext 16, 14, WHITE, txt_2p, 11
+    jmp tm_cursor
+tm_multi:
+    +prtext 14, 14, WHITE, txt_1p, 13
+    +prtext 16, 14, YELLOW, txt_2p, 11
+tm_cursor:
+    ; blinking '>' cursor in front of the picked line
+    lda #$20
+    sta SCREEN+14*40+12
+    sta SCREEN+16*40+12
     lda framectr
-    and #32
-    bne tu_hide
-    +prtext 15, 11, YELLOW, txt_press, 17
+    and #16
+    bne tu_start
+    lda mp_mode
+    bne tm_cur2
+    lda #62              ; '>'
+    sta SCREEN+14*40+12
+    lda #YELLOW
+    sta COLRAM+14*40+12
     jmp tu_start
-tu_hide:
-    +prtext 15, 11, YELLOW, txt_blank, 17
+tm_cur2:
+    lda #62
+    sta SCREEN+16*40+12
+    lda #YELLOW
+    sta COLRAM+16*40+12
+
 tu_start:
+    ; fire or space starts the picked mode
     jsr start_edge
     beq tu_done
+title_go:
     jmp play_init        ; its rts returns to the main loop
 tu_done:
     rts

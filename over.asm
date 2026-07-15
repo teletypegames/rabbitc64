@@ -32,17 +32,17 @@ over_init:
     rts
 
 over_update:
-    ; blink the retry prompt
+    ; blink the return prompt
     lda framectr
     and #32
     bne ou_hide
-    +prtext 16, 14, YELLOW, txt_retry, 12
+    +prtext 16, 13, YELLOW, txt_return, 13
     jmp ou_start
 ou_hide:
-    +prtext 16, 14, YELLOW, txt_blank, 12
+    +prtext 16, 13, YELLOW, txt_blank, 13
 ou_start:
     jsr start_edge
     beq ou_done
-    jmp play_init        ; its rts returns to the main loop
+    jmp title_init       ; back to the menu, mode can be re-picked
 ou_done:
     rts

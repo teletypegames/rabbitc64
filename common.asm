@@ -206,9 +206,47 @@ rj_noright:
     lda joyb
     rts
 
-; fire or space held? returns A != 0 when pressed
+; read joystick port 1 merged with the j/l keys (player 2),
+; return active-high bits in A and joyb2
+read_joy2:
+    lda #$ff             ; no column selected: port B = joystick 1
+    sta CIA1_PA
+    lda CIA1_PB
+    eor #$ff
+    and #$1f
+    sta joyb2
+    and #$0f             ; a held direction grounds the same port B
+    bne rj2_done         ;   lines the key rows use: skip the scan
+    lda #$ef             ; 'j' = left: keyboard column 4, row bit 2
+    sta CIA1_PA
+    lda CIA1_PB
+    and #$04
+    bne rj2_noleft
+    lda joyb2
+    ora #JOY_LEFT
+    sta joyb2
+rj2_noleft:
+    lda #$df             ; 'l' = right: keyboard column 5, row bit 2
+    sta CIA1_PA
+    lda CIA1_PB
+    and #$04
+    bne rj2_done
+    lda joyb2
+    ora #JOY_RIGHT
+    sta joyb2
+rj2_done:
+    lda joyb2
+    rts
+
+; fire on either stick or space held? returns A != 0 when pressed
 start_pressed:
     jsr read_joy
+    and #JOY_FIRE
+    bne sp_done
+    lda #$ff             ; deselect the columns: port B = joystick 1
+    sta CIA1_PA
+    lda CIA1_PB
+    eor #$ff
     and #JOY_FIRE
     bne sp_done
     lda #$7f             ; space: keyboard column 7, row bit 4
@@ -546,12 +584,14 @@ txt_score:   !scr "score"
 txt_miss:    !scr "miss"
 txt_rabbit:  !scr "rabbit"
 txt_scooter: !scr "scooter"
-txt_press:   !scr "fire = start game"
-txt_info:    !scr "joystick 2 or a/d moves"
+txt_1p:      !scr "single player"
+txt_2p:      !scr "multiplayer"
+txt_info:    !scr "p1: joystick 2 or a/d"
+txt_info2:   !scr "p2: joystick 1 or j/l"
 txt_ttgname: !scr "teletype games"
 txt_presents:!scr "presents"
 txt_over:    !scr "game over"
-txt_retry:   !scr "fire = retry"
+txt_return:  !scr "fire = return"
 txt_blank:   !fill 19, $20
 
 washtbl:                 ; gold glow ramp (16 entries, cyclic)
@@ -565,7 +605,10 @@ bg_top:    !byte COL_SKY ; background color above / below the
 bg_bot:    !byte COL_GRASS   ; horizon raster split
 seed:      !byte $a7     ; rand8 LFSR state
 fheld:     !byte 0       ; fire/space edge detection state
-joyb:      !byte 0       ; joystick bits from read_joy (active high)
+joyb:      !byte 0       ; player 1 input bits from read_joy
+joyb2:     !byte 0       ; player 2 input bits from read_joy2
+mp_mode:   !byte 0       ; 0 = single player, 1 = multiplayer
+k12held:   !byte 0       ; menu '1'/'2' key edge detection state
 en_sh:     !byte 0       ; per-frame sprite register shadows
 msb_sh:    !byte 0
 xex_sh:    !byte 0

@@ -17,8 +17,8 @@ steers the closest one left and right, trying to run the scooter down.
 
 | Input | Action |
 |-------|--------|
-| Menu: joystick up/down, or the `S` / `M` keys | pick single player / multiplayer |
-| Menu: fire (or `SPACE`); the `1` / `2` keys pick and start at once | start the picked mode |
+| Menu: joystick up/down, or the `S` / `M` / `C` keys | pick single player / multiplayer / credits |
+| Menu: fire (or `SPACE`); the `1` / `2` keys pick and start at once | open the picked line |
 | P1: joystick port 2 left/right, or `A` / `D` | move the scooter (auto-repeats while held) |
 | P2: joystick port 1 left/right, or `J` / `L` | steer the closest rabbit (multiplayer) |
 | Fire (or `SPACE`) | start; on the game over screen: back to the menu |
@@ -51,7 +51,8 @@ steers the closest one left and right, trying to run the scooter down.
 | `main.asm` | BASIC stub, init, frame loop, state dispatch |
 | `defs.asm` | registers, constants, zero page, macros |
 | `intro.asm` | boot screen: giant TTG logo with the gold wash |
-| `title.asm` | full-screen menu: big logo, start game, hopping rabbits |
+| `title.asm` | full-screen menu: big logo, mode picker, hopping rabbits |
+| `credits.asm` | demo-style credits: pixel scroller, gold wash, rainbow crew, sprite parade + AI warning |
 | `play.asm` | gameplay: input, spawning, scoring, HUD |
 | `over.asm` | full-screen game over: big title, score, retry |
 | `common.asm` | shared routines: printing, road, input, RNG, rabbit positioning |

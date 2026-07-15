@@ -116,6 +116,7 @@ wf_hit:
 ; ============================================================
 !src "intro.asm"
 !src "title.asm"
+!src "credits.asm"
 !src "play.asm"
 !src "over.asm"
 !src "common.asm"

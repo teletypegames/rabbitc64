@@ -5,6 +5,7 @@
 
 ; ---- hardware registers ----
 RASTER  = $d012          ; current raster line
+XCTRL   = $d016          ; horizontal fine scroll + 38/40 column mode
 BORDER  = $d020          ; border color register
 BG      = $d021          ; background color register
 SCREEN  = $0400          ; screen RAM (40x25 chars)

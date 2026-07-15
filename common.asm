@@ -67,7 +67,17 @@ draw_road:
     ldx #0
 dr_loop:
     stx drtmp
-    txa
+    jsr road_row
+    ldx drtmp
+    inx
+    cpx #19
+    bne dr_loop
+    jmp draw_trees
+
+; ---- redraw road row drtmp (0-18, char row 6+drtmp):
+; edge chars + grey fill; also erases text printed over it ----
+road_row:
+    lda drtmp
     clc
     adc #6               ; road runs from char row 6 to row 24
     tax
@@ -90,21 +100,19 @@ dr_loop:
     lda #COL_EDGE
     sta (collo),y
     dey                  ; fill the surface between the edges
-dr_fill:
+rr_fill:
     cpy drleft
-    beq dr_rowdone
+    beq rr_done
     lda #$a0             ; inverse space: solid block
     sta (scrlo),y
     lda #COL_ROAD
     sta (collo),y
     dey
-    jmp dr_fill
-dr_rowdone:
-    ldx drtmp
-    inx
-    cpx #19
-    bne dr_loop
-; falls through: the roadside trees
+    jmp rr_fill
+rr_done:
+    rts
+
+; ---- the roadside trees ----
 draw_trees:
     lda #0
     sta ttidx
@@ -537,14 +545,23 @@ txt_score:   !scr "score"
 txt_miss:    !scr "miss"
 txt_rabbit:  !scr "rabbit"
 txt_scooter: !scr "scooter"
-txt_press:   !scr "press fire to start"
-txt_info:    !scr "joystick 2 or a/d   fire starts"
+txt_press:   !scr "fire = start game"
+txt_info:    !scr "joystick 2 or a/d moves"
+txt_ttgname: !scr "teletype games"
+txt_presents:!scr "presents"
 txt_over:    !scr "game over"
 txt_retry:   !scr "fire = retry"
 txt_blank:   !fill 19, $20
 
+washtbl:                 ; gold glow ramp (16 entries, cyclic)
+    !byte $09, $02, $08, $0a, $07, $07, $01, $01
+    !byte $01, $01, $07, $07, $0a, $08, $02, $09
+
 ; ---- shared variables ----
 framectr:  !byte 0       ; frame counter, incremented by the main loop
+washphase: !byte 0       ; gold wash offset on the intro letters
+bg_top:    !byte COL_SKY ; background color above / below the
+bg_bot:    !byte COL_GRASS   ; horizon raster split
 seed:      !byte $a7     ; rand8 LFSR state
 fheld:     !byte 0       ; fire/space edge detection state
 joyb:      !byte 0       ; joystick bits from read_joy (active high)

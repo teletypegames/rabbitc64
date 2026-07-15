@@ -20,7 +20,10 @@ in the original.
 ## How it works
 
 - PAL frame loop synced by polling the raster beam (no interrupts), one
-  state update per frame — title, play and game over are `updvec` states.
+  state update per frame — intro, menu, play and game over are `updvec`
+  states. Boot shows the giant TTG / Teletype Games logo with the gold
+  color wash from the c64-demo, then the menu with *fire = start game*;
+  losing brings up the final score with *fire = retry*.
 - The background is raster-split at the horizon: sky above, grass below.
   The road is a grey wedge of inverse-space characters between painted
   white edge lines, with trees along both shoulders.
@@ -40,7 +43,8 @@ in the original.
 |------|----------|
 | `main.asm` | BASIC stub, init, frame loop, state dispatch |
 | `defs.asm` | registers, constants, zero page, macros |
-| `title.asm` | title screen: logo, parked scooters, demo rabbits |
+| `intro.asm` | boot screen: giant TTG logo with the gold wash |
+| `title.asm` | menu screen: logo, start game, demo rabbits |
 | `play.asm` | gameplay: input, spawning, scoring, HUD |
 | `over.asm` | game over box + retry |
 | `common.asm` | shared routines: printing, road, input, RNG, rabbit positioning |

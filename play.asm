@@ -6,6 +6,10 @@
 
 ; ---- start (or restart) a round ----
 play_init:
+    lda #COL_SKY         ; in case we come from a black screen
+    sta bg_top
+    lda #COL_GRASS
+    sta bg_bot
     jsr clear_screen
     jsr draw_road
 

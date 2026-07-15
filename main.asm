@@ -65,7 +65,7 @@ sprcol:
 !ifdef AUTOPLAY {        ; test builds boot straight into the game
     jsr play_init
 } else {
-    jsr title_init
+    jsr intro_init       ; TTG logo, then the menu
 }
 
 ; ============================================================
@@ -74,16 +74,16 @@ sprcol:
 ; ============================================================
 main:
     jsr wait_frame
-    lda #COL_SKY         ; repaint the sky while the beam is off screen
+    lda bg_top           ; repaint the sky while the beam is off screen
     sta BG
     inc framectr
     jsr rand8            ; stir the RNG once per frame
     jsr call_update      ; finishes long before the horizon line
 wait_grass:
     lda RASTER           ; split the background at the horizon:
-    cmp #RAS_SPLIT       ;   sky above, grass below
-    bne wait_grass
-    lda #COL_GRASS
+    cmp #RAS_SPLIT       ;   sky above, grass below (the intro
+    bne wait_grass       ;   sets both halves to black)
+    lda bg_bot
     sta BG
     jmp main
 
@@ -114,6 +114,7 @@ wf_hit:
 ; ============================================================
 ; the states and everything they share
 ; ============================================================
+!src "intro.asm"
 !src "title.asm"
 !src "play.asm"
 !src "over.asm"

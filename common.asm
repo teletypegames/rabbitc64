@@ -89,7 +89,8 @@ dr_loop:
 
 ; ---- input ----
 
-; read joystick port 2, return active-high bits in A and joyb
+; read joystick port 2 merged with the a/d keys,
+; return active-high bits in A and joyb
 read_joy:
     lda #$ff             ; deselect every keyboard column first
     sta CIA1_PA
@@ -97,6 +98,25 @@ read_joy:
     eor #$ff
     and #$1f
     sta joyb
+    lda #$fd             ; 'a' = left: keyboard column 1, row bit 2
+    sta CIA1_PA
+    lda CIA1_PB
+    and #$04
+    bne rj_noleft
+    lda joyb
+    ora #JOY_LEFT
+    sta joyb
+rj_noleft:
+    lda #$fb             ; 'd' = right: keyboard column 2, row bit 2
+    sta CIA1_PA
+    lda CIA1_PB
+    and #$04
+    bne rj_noright
+    lda joyb
+    ora #JOY_RIGHT
+    sta joyb
+rj_noright:
+    lda joyb
     rts
 
 ; fire or space held? returns A != 0 when pressed
@@ -439,7 +459,7 @@ txt_miss:    !scr "miss"
 txt_rabbit:  !scr "rabbit"
 txt_scooter: !scr "scooter"
 txt_press:   !scr "press fire to start"
-txt_info:    !scr "joystick 2 moves   fire starts"
+txt_info:    !scr "joystick 2 or a/d   fire starts"
 txt_over:    !scr "game over"
 txt_retry:   !scr "fire = retry"
 txt_blank:   !fill 19, $20

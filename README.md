@@ -14,7 +14,7 @@ in the original.
 
 | Input | Action |
 |-------|--------|
-| Joystick port 2 left/right | change lane (auto-repeats while held) |
+| Joystick port 2 left/right, or `A` / `D` | change lane (auto-repeats while held) |
 | Fire (or `SPACE`) | start / retry |
 
 ## How it works

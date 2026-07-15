@@ -10,7 +10,7 @@ title_init:
 
     +prbig 1, 8, BLACK, txt_rabbit, 6
     +prtext 6, 16, BLACK, txt_scooter, 7
-    +prtext 17, 5, BLACK, txt_info, 30
+    +prtext 17, 4, BLACK, txt_info, 31
 
     ; one parked scooter per lane on sprites 0-4
     ldx #4

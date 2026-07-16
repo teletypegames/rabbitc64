@@ -115,7 +115,7 @@ wf_hit:
 ; the states and everything they share
 ; ============================================================
 !src "intro.asm"
-!src "title.asm"
+!src "menu.asm"
 !src "credits.asm"
 !src "play.asm"
 !src "over.asm"

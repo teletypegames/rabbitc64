@@ -624,6 +624,7 @@ txt_info:    !scr "p1: joystick 2 or a/d"
 txt_info2:   !scr "p2: joystick 1 or j/l"
 txt_ttgname: !scr "teletype games"
 txt_presents:!scr "presents"
+txt_vs:      !scr "vs"
 txt_over:    !scr "game over"
 txt_return:  !scr "fire = return"
 txt_blank:   !fill 19, $20

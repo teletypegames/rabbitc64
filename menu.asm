@@ -1,17 +1,18 @@
 ; -----------------------------------------------------------
-; title.asm - full-screen menu card: big RABBIT / SCOOTER
+; menu.asm - full-screen menu card: big RABBIT VS SCOOTER
 ; logo flanked by two hopping rabbits, and a three-item menu:
 ; single player / multiplayer / credits (joystick up/down +
 ; fire; s, m, c pick; 1 and 2 pick and start at once)
 ; -----------------------------------------------------------
 
-title_init:
+menu_init:
     lda #BLACK           ; the menu plays on a black screen
     sta bg_top
     sta bg_bot
     jsr clear_screen
 
     +prbig 1, 8, RED, txt_rabbit, 6
+    +prtext 6, 19, YELLOW, txt_vs, 2
     +prbig 7, 6, WHITE, txt_scooter, 7
 
     lda mp_mode          ; cursor starts on the last played mode
@@ -45,10 +46,10 @@ title_init:
     lda #%00000111
     sta SPR_EN
 
-    +setupd title_update
+    +setupd menu_update
     rts
 
-title_update:
+menu_update:
     ; hop the flanking rabbits through the big frames,
     ; half a cycle apart
     lda framectr
@@ -72,28 +73,28 @@ title_update:
     jsr read_joy
     lda joyb
     and #3
-    beq tu_udrel
+    beq mu_udrel
     lda udheld
-    bne tu_udend
+    bne mu_udend
     lda #1
     sta udheld
     lda joyb
     and #1               ; up
-    beq tu_down
+    beq mu_down
     lda menusel
-    beq tu_udend
+    beq mu_udend
     dec menusel
-    jmp tu_udend
-tu_down:
+    jmp mu_udend
+mu_down:
     lda menusel
     cmp #MENU_ITEMS-1
-    beq tu_udend
+    beq mu_udend
     inc menusel
-    jmp tu_udend
-tu_udrel:
+    jmp mu_udend
+mu_udrel:
     lda #0
     sta udheld
-tu_udend:
+mu_udend:
 
     ; letter keys pick a line (fire still starts); skipped
     ; while joystick 1 fire is down, because it grounds the
@@ -102,31 +103,31 @@ tu_udend:
     sta CIA1_PA
     lda CIA1_PB
     and #$10
-    beq tu_keydone
+    beq mu_keydone
     lda #$fd             ; 's': keyboard column 1, row bit 5
     sta CIA1_PA
     lda CIA1_PB
     and #$20
-    bne tu_nos
+    bne mu_nos
     lda #0
     sta menusel
-tu_nos:
+mu_nos:
     lda #$ef             ; 'm': keyboard column 4, row bit 4
     sta CIA1_PA
     lda CIA1_PB
     and #$10
-    bne tu_nom
+    bne mu_nom
     lda #1
     sta menusel
-tu_nom:
+mu_nom:
     lda #$fb             ; 'c': keyboard column 2, row bit 4
     sta CIA1_PA
     lda CIA1_PB
     and #$10
-    bne tu_noc
+    bne mu_noc
     lda #2
     sta menusel
-tu_noc:
+mu_noc:
 
     ; the 1 / 2 keys pick and start right away (edge detected)
     lda #$7f             ; keyboard column 7: '1' = bit 0, '2' = bit 3
@@ -134,38 +135,38 @@ tu_noc:
     lda CIA1_PB
     and #$09
     cmp #$09
-    beq tu_keyup         ; neither key held
+    beq mu_keyup         ; neither key held
     ldx k12held
-    bne tu_keydone       ; still held from an earlier frame
+    bne mu_keydone       ; still held from an earlier frame
     inx
     stx k12held
     and #$01
-    bne tu_key2
+    bne mu_key2
     lda #0
     sta menusel
-    jmp title_go
-tu_key2:
+    jmp menu_go
+mu_key2:
     lda #1
     sta menusel
-    jmp title_go
-tu_keyup:
+    jmp menu_go
+mu_keyup:
     lda #0
     sta k12held
-tu_keydone:
+mu_keydone:
 
     ; footer: the two control lines take turns
     lda framectr
     and #64
-    beq tu_foot2
+    beq mu_foot2
     +prtext 21, 9, LGREY, txt_info, 21
-    jmp tu_footdone
-tu_foot2:
+    jmp mu_footdone
+mu_foot2:
     +prtext 21, 9, LGREY, txt_info2, 21
-tu_footdone:
+mu_footdone:
 
     ; the menu items: the picked line is yellow
     ldx #0
-tm_items:
+mm_items:
     txa
     pha
     jsr draw_mitem
@@ -173,7 +174,7 @@ tm_items:
     tax
     inx
     cpx #MENU_ITEMS
-    bne tm_items
+    bne mm_items
 
     ; blinking '>' cursor in front of the picked line
     lda #$20
@@ -182,7 +183,7 @@ tm_items:
     sta SCREEN+18*40+12
     lda framectr
     and #16
-    bne tu_start
+    bne mu_start
     ldx menusel
     lda mcur_lo,x
     sta scrlo
@@ -198,19 +199,19 @@ tm_items:
     lda #YELLOW
     sta (scrlo),y
 
-tu_start:
+mu_start:
     ; fire or space opens the picked line
     jsr start_edge
-    beq tu_done
-title_go:
+    beq mu_done
+menu_go:
     lda menusel
     cmp #2
-    beq tg_credits
+    beq mg_credits
     sta mp_mode          ; item 0 / 1 doubles as the player count
     jmp play_init        ; its rts returns to the main loop
-tg_credits:
+mg_credits:
     jmp credits_init
-tu_done:
+mu_done:
     rts
 
 ; ---- draw menu item X, yellow when it is the picked one ----

@@ -265,7 +265,7 @@ cu_input:
     beq cu_stay
     lda #$c8             ; leave with the scroll register clean
     sta XCTRL
-    jmp title_init       ; back to the menu
+    jmp menu_init        ; back to the menu
 cu_stay:
 
     ; ---- beam work: fine scroll on for the scroller row only ----

@@ -83,11 +83,11 @@ iw_skip:
     ; fire skips, otherwise wait out the timer
     jsr start_edge
     beq iw_tick
-    jmp title_init
+    jmp menu_init
 iw_tick:
     dec introt
     bne iw_done
-    jmp title_init
+    jmp menu_init
 iw_done:
     rts
 

@@ -43,6 +43,6 @@ ou_hide:
 ou_start:
     jsr start_edge
     beq ou_done
-    jmp title_init       ; back to the menu, mode can be re-picked
+    jmp menu_init        ; back to the menu, mode can be re-picked
 ou_done:
     rts

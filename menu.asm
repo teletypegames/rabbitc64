@@ -1,8 +1,9 @@
 ; -----------------------------------------------------------
 ; menu.asm - full-screen menu card: big RABBIT VS SCOOTER
-; logo flanked by two hopping rabbits, and a three-item menu:
-; single player / multiplayer / credits (joystick up/down +
-; fire; s, m, c pick; 1 and 2 pick and start at once)
+; logo flanked by two hopping rabbits, and a four-item menu:
+; single player / multiplayer / credits / story
+; (joystick up/down + fire; s, m, c, t shortcut keys;
+; 1 and 2 pick player mode and start at once)
 ; -----------------------------------------------------------
 
 menu_init:
@@ -25,12 +26,6 @@ menu_init:
     lda #WHITE
     sta SPR_COL+1
     sta SPR_COL+2
-    lda #SPRP_SCOOT
-    sta SPRPTR
-    lda #172             ; center lane position
-    sta SPRPOS
-    lda #226             ; just below the footer line
-    sta SPRPOS+1
     lda #30              ; left rabbit
     sta SPRPOS+2
     lda #58
@@ -43,7 +38,7 @@ menu_init:
     lda #%00000110       ; both rabbits double-sized
     sta SPR_XEX
     sta SPR_YEX
-    lda #%00000111
+    lda #%00000110       ; only the two flanking rabbits
     sta SPR_EN
 
     +setupd menu_update
@@ -128,6 +123,12 @@ mu_nom:
     lda #2
     sta menusel
 mu_noc:
+    lda CIA1_PB          ; column 2 still selected
+    and #$40             ; 't': keyboard column 2, row bit 6
+    bne mu_not
+    lda #3
+    sta menusel
+mu_not:
 
     ; the 1 / 2 keys pick and start right away (edge detected)
     lda #$7f             ; keyboard column 7: '1' = bit 0, '2' = bit 3
@@ -158,10 +159,10 @@ mu_keydone:
     lda framectr
     and #64
     beq mu_foot2
-    +prtext 21, 9, LGREY, txt_info, 21
+    +prtext 22, 9, LGREY, txt_info, 21
     jmp mu_footdone
 mu_foot2:
-    +prtext 21, 9, LGREY, txt_info2, 21
+    +prtext 22, 9, LGREY, txt_info2, 21
 mu_footdone:
 
     ; the menu items: the picked line is yellow
@@ -181,6 +182,7 @@ mm_items:
     sta SCREEN+14*40+12
     sta SCREEN+16*40+12
     sta SCREEN+18*40+12
+    sta SCREEN+20*40+12
     lda framectr
     and #16
     bne mu_start
@@ -207,10 +209,14 @@ menu_go:
     lda menusel
     cmp #2
     beq mg_credits
+    cmp #3
+    beq mg_story
     sta mp_mode          ; item 0 / 1 doubles as the player count
     jmp play_init        ; its rts returns to the main loop
 mg_credits:
     jmp credits_init
+mg_story:
+    jmp story_init
 mu_done:
     rts
 
@@ -239,16 +245,18 @@ dm_store:
     rts
 
 ; ---- menu tables ----
-MENU_ITEMS = 3
-mitem_lo:  !byte <txt_1p, <txt_2p, <txt_credits
-mitem_hi:  !byte >txt_1p, >txt_2p, >txt_credits
-mitem_len: !byte 13, 11, 7
-mitem_row: !byte 14, 16, 18
+MENU_ITEMS = 4
+mitem_lo:  !byte <txt_1p, <txt_2p, <txt_credits, <txt_story
+mitem_hi:  !byte >txt_1p, >txt_2p, >txt_credits, >txt_story
+mitem_len: !byte 13, 11, 7, 5
+mitem_row: !byte 14, 16, 18, 20
 mcur_lo:                 ; cursor cells: column 12 of those rows
-    !byte <(SCREEN+14*40+12), <(SCREEN+16*40+12), <(SCREEN+18*40+12)
+    !byte <(SCREEN+14*40+12), <(SCREEN+16*40+12)
+    !byte <(SCREEN+18*40+12), <(SCREEN+20*40+12)
 mcur_hi:
-    !byte >(SCREEN+14*40+12), >(SCREEN+16*40+12), >(SCREEN+18*40+12)
+    !byte >(SCREEN+14*40+12), >(SCREEN+16*40+12)
+    !byte >(SCREEN+18*40+12), >(SCREEN+20*40+12)
 
 ; ---- menu variables ----
-menusel:   !byte 0       ; picked line: 0-2
+menusel:   !byte 0       ; picked line: 0-3
 udheld:    !byte 0       ; joystick up/down edge detection state

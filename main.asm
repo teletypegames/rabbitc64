@@ -117,6 +117,7 @@ wf_hit:
 !src "intro.asm"
 !src "menu.asm"
 !src "credits.asm"
+!src "story.asm"
 !src "play.asm"
 !src "over.asm"
 !src "common.asm"

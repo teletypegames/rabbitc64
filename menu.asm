@@ -2,8 +2,8 @@
 ; menu.asm - full-screen menu card: big RABBIT VS SCOOTER
 ; logo flanked by two hopping rabbits, and a four-item menu:
 ; single player / multiplayer / credits / story
-; (joystick up/down + fire; s, m, c, t shortcut keys;
-; 1 and 2 pick player mode and start at once)
+; (joystick up/down + fire; the s, m, c, t shortcut keys and
+; the 1 / 2 player-mode keys all start their line at once)
 ; -----------------------------------------------------------
 
 menu_init:
@@ -18,6 +18,8 @@ menu_init:
 
     lda mp_mode          ; cursor starts on the last played mode
     sta menusel
+    lda #1               ; a letter still held from the previous
+    sta lkheld           ; screen must be released first
 
     ; decoration: white rabbits flank the logo (sprites 1-2,
     ; double-sized), the red scooter waits at the bottom
@@ -95,44 +97,52 @@ mu_udrel:
     sta udheld
 mu_udend:
 
-    ; letter keys pick a line (fire still starts); skipped
-    ; while joystick 1 fire is down, because it grounds the
-    ; same row line the 'm' and 'c' keys sit on
+    ; letter keys pick a line and open it right away (edge
+    ; detected); skipped while joystick 1 fire is down, because
+    ; it grounds the same row line the 'm' and 'c' keys sit on
     lda #$ff
     sta CIA1_PA
     lda CIA1_PB
     and #$10
     beq mu_keydone
+    ldx #$ff             ; no letter key seen yet
     lda #$fd             ; 's': keyboard column 1, row bit 5
     sta CIA1_PA
     lda CIA1_PB
     and #$20
     bne mu_nos
-    lda #0
-    sta menusel
+    ldx #0
 mu_nos:
     lda #$ef             ; 'm': keyboard column 4, row bit 4
     sta CIA1_PA
     lda CIA1_PB
     and #$10
     bne mu_nom
-    lda #1
-    sta menusel
+    ldx #1
 mu_nom:
     lda #$fb             ; 'c': keyboard column 2, row bit 4
     sta CIA1_PA
     lda CIA1_PB
     and #$10
     bne mu_noc
-    lda #2
-    sta menusel
+    ldx #2
 mu_noc:
     lda CIA1_PB          ; column 2 still selected
     and #$40             ; 't': keyboard column 2, row bit 6
     bne mu_not
-    lda #3
-    sta menusel
+    ldx #3
 mu_not:
+    cpx #$ff
+    beq mu_lkup          ; no letter key held
+    lda lkheld
+    bne mu_lkend         ; still held from an earlier frame
+    inc lkheld
+    stx menusel
+    jmp menu_go
+mu_lkup:
+    lda #0
+    sta lkheld
+mu_lkend:
 
     ; the 1 / 2 keys pick and start right away (edge detected)
     lda #$7f             ; keyboard column 7: '1' = bit 0, '2' = bit 3
@@ -263,3 +273,4 @@ mcur_hi:
 ; ---- menu variables ----
 menusel:   !byte 0       ; picked line: 0-3
 udheld:    !byte 0       ; joystick up/down edge detection state
+lkheld:    !byte 0       ; shortcut letter edge detection state

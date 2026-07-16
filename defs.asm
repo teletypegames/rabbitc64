@@ -26,7 +26,8 @@ SPR_XEX  = $d01d         ; horizontal expand
 SPR_COL  = $d027         ; sprite 0 color, +1 = sprite 1, ...
 
 
-; ---- SID registers (voice 1 used for SFX) ----
+; ---- SID registers ----
+SID_BASE = $d400
 SID_V1FL = $d400         ; voice 1 frequency low
 SID_V1FH = $d401         ; voice 1 frequency high
 SID_V1PL = $d402         ; voice 1 pulse width low
@@ -34,6 +35,20 @@ SID_V1PH = $d403         ; voice 1 pulse width high
 SID_V1CR = $d404         ; voice 1 control (waveform + gate)
 SID_V1AD = $d405         ; voice 1 attack/decay
 SID_V1SR = $d406         ; voice 1 sustain/release
+SID_V2FL = $d407         ; voice 2 frequency low
+SID_V2FH = $d408         ; voice 2 frequency high
+SID_V2PL = $d409         ; voice 2 pulse width low
+SID_V2PH = $d40a         ; voice 2 pulse width high
+SID_V2CR = $d40b         ; voice 2 control
+SID_V2AD = $d40c         ; voice 2 attack/decay
+SID_V2SR = $d40d         ; voice 2 sustain/release
+SID_V3FL = $d40e         ; voice 3 frequency low
+SID_V3FH = $d40f         ; voice 3 frequency high
+SID_V3PL = $d410         ; voice 3 pulse width low
+SID_V3PH = $d411         ; voice 3 pulse width high
+SID_V3CR = $d412         ; voice 3 control
+SID_V3AD = $d413         ; voice 3 attack/decay
+SID_V3SR = $d414         ; voice 3 sustain/release
 SID_VOL  = $d418         ; filter mode + master volume
 
 ; ---- SFX IDs ----

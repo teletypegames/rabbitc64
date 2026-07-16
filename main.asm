@@ -124,4 +124,5 @@ wf_hit:
 !src "over.asm"
 !src "common.asm"
 !src "sound.asm"
+!src "music.asm"
 !src "tables.asm"

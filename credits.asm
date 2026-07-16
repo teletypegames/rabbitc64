@@ -59,10 +59,16 @@ ci_col:
     lda #$ff
     sta SPR_EN
 
+    jsr music_init       ; start the credits music
+    lda #0
+    sta sfx_timer        ; prevent SFX driver from touching voice 1
+
     +setupd credits_update
     rts
 
 credits_update:
+    jsr music_play       ; advance the music one tick
+
     ; ---- all the heavy drawing runs first, while the beam
     ; is still far above the scroller row ----
 
@@ -265,6 +271,8 @@ cu_input:
     beq cu_stay
     lda #$c8             ; leave with the scroll register clean
     sta XCTRL
+    jsr music_stop       ; silence all SID voices
+    jsr sfx_init         ; restore SFX driver volume
     jmp menu_init        ; back to the menu
 cu_stay:
 

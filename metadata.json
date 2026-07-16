@@ -1,0 +1,8 @@
+{
+  "name": "rabbit",
+  "title": "Rabbit Scooter",
+  "author": "Teletype Games",
+  "desc": "A Commodore 64 port of rabbitroller, the Game & Watch style LCD mini game. Rabbits hop toward you on a five-lane road; steer your scooter to dodge them. Includes a two-player mode where player 2 steers the rabbits.",
+  "site": "https://git.teletype.hu/games/rabbitc64",
+  "version": "1.0.0"
+}

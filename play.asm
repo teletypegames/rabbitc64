@@ -39,6 +39,7 @@ pti_loop:
     sta miss
     sta flash
     sta spawnt
+    sta dif8
     sta tree_timer
     sta lcnt
     sta rcnt
@@ -199,9 +200,20 @@ pu_nop2:
     sta en_sh
 pu_noflash:
 
-    ; -- spawn: interval = 70 - score/2, floor 22 (as the original) --
+    ; -- difficulty clock: +1 every 64 frames (~1.3 s), capped --
+    lda framectr
+    and #63
+    bne pu_noclk
+    lda dif8
+    cmp #$ff
+    beq pu_noclk
+    inc dif8
+pu_noclk:
+
+    ; -- spawn: interval = 70 - time/2, floor 22; the clock, not
+    ; the score, drives it, so the pace always keeps climbing --
     inc spawnt
-    lda score8
+    lda dif8
     cmp #96
     bcc pu_ivcalc
     lda #22
@@ -245,6 +257,7 @@ pu_rhit:
     jsr add_miss         ; ran into you
     jmp pu_rnext
 pu_ralive:
+    jsr rab_steer
     jsr rab_pos
 pu_rnext:
     dex
@@ -261,6 +274,54 @@ pu_rnext:
     jsr sfx_play
     jmp over_init        ; its rts returns to the main loop
 pu_done:
+    rts
+
+; ---- single player: rabbit X sometimes hops a lane, mostly
+; toward the scooter but sometimes away, so a dodge can work;
+; hops stop on the last quarter of the run (no unfair hits) ----
+rab_steer:
+    lda mp_mode
+    bne rst_done         ; multiplayer: player 2 does the steering
+    lda r_thi,x
+    cmp #$c0
+    bcs rst_done         ; too close to the player line already
+    jsr rand8
+    and #31              ; hop roughly every 32nd frame
+    bne rst_done
+    lda r_lane,x
+    cmp player_lane
+    beq rst_rand         ; sharing the scooter's lane: random side
+    bcc rst_right        ; rabbit is on the left: toward = right
+    lda #$ff
+    bne rst_bias
+rst_right:
+    lda #1
+rst_bias:
+    sta rtmp2
+    jsr rand8
+    cmp #64              ; 1 in 4 hops go the other way
+    bcs rst_move
+    lda rtmp2
+    eor #$fe             ; $01 <-> $ff
+    sta rtmp2
+    jmp rst_move
+rst_rand:
+    jsr rand8
+    lsr
+    lda #1
+    bcc rst_store
+    lda #$ff
+rst_store:
+    sta rtmp2
+rst_move:
+    lda r_lane,x
+    clc
+    adc rtmp2
+    bmi rst_done         ; already on the leftmost lane
+    cmp #LANES
+    bcs rst_done         ; ... or the rightmost one
+    sta r_lane,x
+rst_done:
     rts
 
 ; ---- shift the closest live rabbit's lane by rtmp2 (+/-1) ----
@@ -486,6 +547,7 @@ sc_d2:       !byte 0
 miss:        !byte 0
 flash:       !byte 0     ; frames left of the post-hit blink
 spawnt:      !byte 0     ; frames since the last spawn
+dif8:        !byte 0     ; elapsed-time difficulty, +1 per 64 frames
 lcnt:        !byte 0     ; held-direction counters for the auto-repeat
 rcnt:        !byte 0
 p2lcnt:      !byte 0     ; the same for player 2's steering

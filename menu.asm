@@ -79,12 +79,16 @@ menu_update:
     lda menusel
     beq mu_udend
     dec menusel
+    lda #SFX_CURSOR
+    jsr sfx_play
     jmp mu_udend
 mu_down:
     lda menusel
     cmp #MENU_ITEMS-1
     beq mu_udend
     inc menusel
+    lda #SFX_CURSOR
+    jsr sfx_play
     jmp mu_udend
 mu_udrel:
     lda #0
@@ -155,15 +159,9 @@ mu_keyup:
     sta k12held
 mu_keydone:
 
-    ; footer: the two control lines take turns
-    lda framectr
-    and #64
-    beq mu_foot2
+    ; footer: both control lines always visible
     +prtext 22, 9, LGREY, txt_info, 21
-    jmp mu_footdone
-mu_foot2:
-    +prtext 22, 9, LGREY, txt_info2, 21
-mu_footdone:
+    +prtext 23, 9, LGREY, txt_info2, 21
 
     ; the menu items: the picked line is yellow
     ldx #0
@@ -206,6 +204,8 @@ mu_start:
     jsr start_edge
     beq mu_done
 menu_go:
+    lda #SFX_SELECT
+    jsr sfx_play
     lda menusel
     cmp #2
     beq mg_credits
@@ -238,8 +238,10 @@ draw_mitem:
     lda #YELLOW
 dm_store:
     sta pcolor
+    stx rtmp              ; print_text trashes X
     jsr print_text
-    ldy #0               ; recolor the first letter (shortcut key)
+    ldx rtmp
+    ldy mitem_key,x      ; recolor the shortcut letter
     lda #CYAN
     sta (collo),y
     rts
@@ -248,6 +250,7 @@ dm_store:
 MENU_ITEMS = 4
 mitem_lo:  !byte <txt_1p, <txt_2p, <txt_credits, <txt_story
 mitem_hi:  !byte >txt_1p, >txt_2p, >txt_credits, >txt_story
+mitem_key: !byte 0, 0, 0, 1  ; offset of the highlighted shortcut letter
 mitem_len: !byte 13, 11, 7, 5
 mitem_row: !byte 14, 16, 18, 20
 mcur_lo:                 ; cursor cells: column 12 of those rows

@@ -61,6 +61,7 @@ sprcol:
     sta SPR_YEX
     sta framectr
     sta fheld
+    jsr sfx_init
 
 !ifdef AUTOPLAY {        ; test builds boot straight into the game
     jsr play_init
@@ -78,6 +79,7 @@ main:
     sta BG
     inc framectr
     jsr rand8            ; stir the RNG once per frame
+    jsr sfx_update       ; advance sound effects
     jsr call_update      ; finishes long before the horizon line
 wait_grass:
     lda RASTER           ; split the background at the horizon:
@@ -121,4 +123,5 @@ wf_hit:
 !src "play.asm"
 !src "over.asm"
 !src "common.asm"
+!src "sound.asm"
 !src "tables.asm"

@@ -26,6 +26,24 @@ SPR_XEX  = $d01d         ; horizontal expand
 SPR_COL  = $d027         ; sprite 0 color, +1 = sprite 1, ...
 
 
+; ---- SID registers (voice 1 used for SFX) ----
+SID_V1FL = $d400         ; voice 1 frequency low
+SID_V1FH = $d401         ; voice 1 frequency high
+SID_V1PL = $d402         ; voice 1 pulse width low
+SID_V1PH = $d403         ; voice 1 pulse width high
+SID_V1CR = $d404         ; voice 1 control (waveform + gate)
+SID_V1AD = $d405         ; voice 1 attack/decay
+SID_V1SR = $d406         ; voice 1 sustain/release
+SID_VOL  = $d418         ; filter mode + master volume
+
+; ---- SFX IDs ----
+SFX_SCORE  = 0           ; rabbit dodged: high pling
+SFX_MISS   = 1           ; rabbit hit: noise crash
+SFX_OVER   = 2           ; game over: descending sweep
+SFX_CURSOR = 3           ; menu cursor move: click
+SFX_SELECT = 4           ; menu fire: rising tone
+NSFX       = 5
+
 ; ---- colors ----
 BLACK   = 0
 WHITE   = 1

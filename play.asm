@@ -257,6 +257,8 @@ pu_rnext:
     lda miss
     cmp #MAX_MISS
     bcc pu_done
+    lda #SFX_OVER
+    jsr sfx_play
     jmp over_init        ; its rts returns to the main loop
 pu_done:
     rts
@@ -423,6 +425,8 @@ at_done:
 
 ; ---- score: bump the decimal digits and the difficulty byte ----
 add_score:
+    lda #SFX_SCORE
+    jsr sfx_play
     lda score8
     cmp #$ff
     beq as_digits
@@ -461,6 +465,8 @@ draw_score:
 
 ; ---- miss: X mark on the HUD + blink the scooter ----
 add_miss:
+    lda #SFX_MISS
+    jsr sfx_play
     inc miss
     ldy miss             ; Y: the rabbit loop still needs X
     lda #24              ; 'x'

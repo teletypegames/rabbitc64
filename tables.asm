@@ -31,10 +31,11 @@ sptab_hi:
     !byte >(i*13)
 }
 
-; scooter sprite x per lane (lane center - 12); lane 4 crosses
-; the 8-bit boundary, pxhi is its MSB flag
+; scooter sprite x per lane (lane center - 24: the scooter is
+; double-sized, 48 wide); lane 4 crosses the 8-bit boundary,
+; pxhi is its MSB flag
 pxlo:
-    !byte 66, 119, 172, 225, 22
+    !byte 54, 107, 160, 213, 10
 pxhi:
     !byte 0, 0, 0, 0, 1
 

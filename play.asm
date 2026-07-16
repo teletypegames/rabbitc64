@@ -68,14 +68,14 @@ pi_col:
     lda #RED
     sta SPR_COL
 
-    ; player sprite: scooter, fixed row, rabbits come per frame
+    ; player sprite: scooter, fixed row, double-sized;
+    ; rabbits come per frame
     lda #SPRP_SCOOT
     sta SPRPTR
     lda #PLAYER_SY
     sta SPRPOS+1
     lda #1
     sta SPR_EN
-    lda #0
     sta SPR_XEX
     sta SPR_YEX
 
@@ -183,10 +183,9 @@ pu_nop2:
     sta SPRPOS           ; sprite 0 x
     lda pxhi,x
     sta msb_sh           ; lane 4 sits past x=255
-    lda #0
+    lda #1               ; the scooter rides double-sized
     sta xex_sh
     sta yex_sh
-    lda #1
     sta en_sh
 
     ; -- a hit blinks the scooter for a dozen frames --

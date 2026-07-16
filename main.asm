@@ -43,7 +43,9 @@ start:
     lda #COL_SKY
     sta BG
 
-    ; sprites: red scooter, white rabbits, hires, in front
+    ; sprites: red scooter, white rabbits, in front; the
+    ; scooter is multicolor (white rider, dark grey chrome),
+    ; the rabbits stay hires silhouettes
     lda #RED
     sta SPR_COL
     ldx #7
@@ -52,9 +54,14 @@ sprcol:
     sta SPR_COL,x
     dex
     bne sprcol
+    lda #%00000001
+    sta SPR_MC
+    lda #WHITE
+    sta SPR_MC1
+    lda #DGREY
+    sta SPR_MC2
     lda #0
     sta SPR_EN
-    sta SPR_MC
     sta SPR_PRIO
     sta SPR_MSBX
     sta SPR_XEX

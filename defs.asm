@@ -23,6 +23,8 @@ SPR_YEX  = $d017         ; vertical expand
 SPR_PRIO = $d01b         ; 1 = sprite behind the characters
 SPR_MC   = $d01c         ; multicolor enable
 SPR_XEX  = $d01d         ; horizontal expand
+SPR_MC1  = $d025         ; shared multicolor 1 (bit pair %01)
+SPR_MC2  = $d026         ; shared multicolor 2 (bit pair %11)
 SPR_COL  = $d027         ; sprite 0 color, +1 = sprite 1, ...
 
 
@@ -91,7 +93,7 @@ LANES     = 5
 NRABBITS  = 7            ; rabbit slots, hardware sprites 1-7
 MAX_MISS  = 3
 ROAD_CX   = 184          ; road center in sprite x coordinates
-PLAYER_SY = 200          ; scooter sprite top (feet on raster line 221)
+PLAYER_SY = 179          ; double-sized scooter top (feet stay on line 221)
 T_BIG     = 112          ; rabbit distance where the big frames start
 T_EXP     = 192          ; ... and where the sprite gets double-sized
 REP_HOLD  = 12           ; frames before a held direction auto-repeats

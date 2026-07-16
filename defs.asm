@@ -5,9 +5,12 @@
 
 ; ---- hardware registers ----
 RASTER  = $d012          ; current raster line
-XCTRL   = $d016          ; horizontal fine scroll + 38/40 column mode
+XCTRL   = $d016          ; fine scroll + 38/40 cols + text multicolor
+VMEM    = $d018          ; VIC memory pointers: screen + charset
 BORDER  = $d020          ; border color register
 BG      = $d021          ; background color register
+CHAR_MC1 = $d022         ; text multicolor 1 (bit pair %01)
+CHAR_MC2 = $d023         ; text multicolor 2 (bit pair %10)
 SCREEN  = $0400          ; screen RAM (40x25 chars)
 COLRAM  = $d800          ; color RAM
 SPRPTR  = $07f8          ; sprite pointers (screen RAM + $3f8)
@@ -80,8 +83,23 @@ LGREY   = 15
 ; ---- scene palette ----
 COL_SKY   = LBLUE        ; background above the horizon
 COL_GRASS = GREEN        ; background below it
-COL_ROAD  = MGREY        ; road surface (inverse-space fill)
-COL_EDGE  = WHITE        ; painted road edge lines
+COL_ROAD  = MGREY        ; road surface (via CHAR_MC2)
+COL_LEAF  = LGREEN       ; tree foliage (via CHAR_MC1)
+
+; ---- RAM charset: ROM copy + custom multicolor glyphs ----
+; the road and the trees render as multicolor text cells
+; (color RAM bit 3 set): pair %01 = CHAR_MC1 (foliage green),
+; %10 = CHAR_MC2 (road grey), %11 = color RAM bits 0-2
+CHSET     = $3800        ; RAM charset location (VIC bank 0)
+CH_EDGEL  = $4e          ; left road edge: grass|white line|road
+CH_EDGER  = $4d          ; right road edge, mirrored
+CH_ROADF  = $6d          ; solid road surface fill
+CH_LEAF   = $6e          ; tree foliage ball
+CH_TRUNK  = $6f          ; tree trunk
+MCOL_EDGE  = 8 + WHITE   ; bit 3 turns the cell multicolor
+MCOL_ROAD  = 8
+MCOL_LEAF  = 8
+MCOL_TRUNK = 8 + RED
 
 ; ---- joystick port 2 bits (after read_joy, active high) ----
 JOY_LEFT  = 4

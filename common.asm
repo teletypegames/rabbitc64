@@ -60,6 +60,68 @@ row_ptr:
     sta colhi
     rts
 
+; ---- charset_init: copy the ROM charset into RAM and patch
+; in the custom road / tree glyphs (multicolor bit pairs, see
+; defs.asm); runs once at boot ----
+charset_init:
+    lda #$33             ; char ROM in at $d000 (IO banked out)
+    sta $01
+    lda #0
+    sta scrlo
+    sta collo
+    lda #$d0
+    sta scrhi
+    lda #>CHSET
+    sta colhi
+    ldx #8               ; the full 2K uppercase/graphics set
+    ldy #0
+chs_copy:
+    lda (scrlo),y
+    sta (collo),y
+    iny
+    bne chs_copy
+    inc scrhi
+    inc colhi
+    dex
+    bne chs_copy
+    lda #$37             ; IO back in
+    sta $01
+    ldx #7               ; overlay the five custom glyphs
+chs_patch:
+    lda gl_edgel,x
+    sta CHSET+CH_EDGEL*8,x
+    lda gl_edger,x
+    sta CHSET+CH_EDGER*8,x
+    lda gl_road,x
+    sta CHSET+CH_ROADF*8,x
+    lda gl_leaf,x
+    sta CHSET+CH_LEAF*8,x
+    lda gl_trunk,x
+    sta CHSET+CH_TRUNK*8,x
+    dex
+    bpl chs_patch
+    lda #$1e             ; VIC: screen at $0400, charset at CHSET
+    sta VMEM
+    lda #COL_LEAF
+    sta CHAR_MC1
+    lda #COL_ROAD
+    sta CHAR_MC2
+    rts
+
+; the custom glyphs: 4 double-wide pixels per row as 2-bit
+; pairs (%00 background, %01 CHAR_MC1, %10 CHAR_MC2, %11 the
+; cell's color RAM bits 0-2)
+gl_edgel:                ; grass | white line \ road grey
+    !byte $03, $03, $0e, $0e, $3a, $3a, $ea, $ea
+gl_edger:                ; road grey / white line | grass
+    !byte $c0, $c0, $b0, $b0, $ac, $ac, $ab, $ab
+gl_road:                 ; solid road surface: all %10 pairs
+    !byte $aa, $aa, $aa, $aa, $aa, $aa, $aa, $aa
+gl_leaf:                 ; foliage ball: %01 pairs
+    !byte $14, $55, $55, $55, $55, $55, $14, $00
+gl_trunk:                ; trunk: %11 pairs, red via color RAM
+    !byte $3c, $3c, $3c, $3c, $3c, $3c, $3c, $3c
+
 ; ---- the road: grey surface between two painted edge lines,
 ; from the horizon apex down to the screen corners, then the
 ; trees along both shoulders ----
@@ -88,25 +150,25 @@ road_row:
     sbc road_off,x
     tay
     sty drleft
-    lda #$4e             ; '/' diagonal
+    lda #CH_EDGEL        ; grass, white line and road in one cell
     sta (scrlo),y
-    lda #COL_EDGE
+    lda #MCOL_EDGE
     sta (collo),y
     lda #20
     clc
     adc road_off,x
     tay
-    lda #$4d             ; '\' diagonal
+    lda #CH_EDGER
     sta (scrlo),y
-    lda #COL_EDGE
+    lda #MCOL_EDGE
     sta (collo),y
     dey                  ; fill the surface between the edges
 rr_fill:
     cpy drleft
     beq rr_done
-    lda #$a0             ; inverse space: solid block
+    lda #CH_ROADF        ; solid road surface
     sta (scrlo),y
-    lda #COL_ROAD
+    lda #MCOL_ROAD
     sta (collo),y
     dey
     jmp rr_fill
@@ -153,9 +215,9 @@ draw_tree:
     jsr row_ptr
     ldy tcol
     iny
-    lda #$5d             ; trunk
+    lda #CH_TRUNK
     sta (scrlo),y
-    lda #BROWN
+    lda #MCOL_TRUNK
     sta (collo),y
     rts
 
@@ -187,9 +249,9 @@ erase_tree:
     rts
 
 tree_ball:
-    lda #$51             ; foliage ball
+    lda #CH_LEAF
     sta (scrlo),y
-    lda #LGREEN
+    lda #MCOL_LEAF
     sta (collo),y
     rts
 

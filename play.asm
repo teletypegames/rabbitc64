@@ -10,6 +10,8 @@ play_init:
     sta bg_top
     lda #COL_GRASS
     sta bg_bot
+    lda #$d8             ; text multicolor on: road + tree cells
+    sta XCTRL
     jsr clear_screen
     jsr draw_road
 

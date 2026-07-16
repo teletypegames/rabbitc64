@@ -68,6 +68,7 @@ sprcol:
     sta SPR_YEX
     sta framectr
     sta fheld
+    jsr charset_init     ; RAM charset with the road/tree glyphs
     jsr sfx_init
 
 !ifdef AUTOPLAY {        ; test builds boot straight into the game
@@ -133,3 +134,6 @@ wf_hit:
 !src "sound.asm"
 !src "music.asm"
 !src "tables.asm"
+!if * > CHSET {
+    !error "program ran into the RAM charset at $3800"
+}

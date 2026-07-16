@@ -7,6 +7,8 @@ over_init:
     lda #BLACK           ; clean card, the playfield is gone
     sta bg_top
     sta bg_bot
+    lda #$c8             ; plain text mode again
+    sta XCTRL
     lda #0
     sta SPR_EN
     jsr clear_screen

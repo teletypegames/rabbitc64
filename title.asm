@@ -231,7 +231,11 @@ draw_mitem:
     lda #YELLOW
 dm_store:
     sta pcolor
-    jmp print_text
+    jsr print_text
+    ldy #0               ; recolor the first letter (shortcut key)
+    lda #CYAN
+    sta (collo),y
+    rts
 
 ; ---- menu tables ----
 MENU_ITEMS = 3

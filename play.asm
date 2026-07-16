@@ -13,6 +13,20 @@ play_init:
     jsr clear_screen
     jsr draw_road
 
+    ; Copy static tree positions into dynamic arrays
+    ldx #0
+    ldy #0
+pti_loop:
+    lda tree_tbl,y
+    sta t_row,x
+    iny
+    lda tree_tbl,y
+    sta t_col,x
+    iny
+    inx
+    cpx #NTREES
+    bne pti_loop
+
     ; HUD: score on the left, miss slots on the right
     +prtext 0, 1, BLACK, txt_score, 5
     +prtext 0, 30, BLACK, txt_miss, 4
@@ -25,6 +39,7 @@ play_init:
     sta miss
     sta flash
     sta spawnt
+    sta tree_timer
     sta lcnt
     sta rcnt
     sta p2lcnt
@@ -236,6 +251,7 @@ pu_rnext:
     bpl pu_rab
 
     jsr write_shadows
+    jsr animate_trees
 
     ; -- third miss ends the round --
     lda miss
@@ -315,6 +331,96 @@ sr_ramp:
     sta r_sphi,x
     rts
 
+; ---- animate roadside trees: scroll down + fan outward ----
+animate_trees:
+    inc tree_timer
+    lda tree_timer
+    cmp #TREE_SPEED
+    bcs at_go
+    rts
+at_go:
+    lda #0
+    sta tree_timer
+
+    ; Phase 1: erase all trees at current positions
+    ldx #NTREES-1
+at_erase:
+    stx at_idx
+    lda t_row,x
+    sta trow
+    lda t_col,x
+    sta tcol
+    jsr erase_tree
+    ldx at_idx
+    dex
+    bpl at_erase
+
+    ; Phase 2: update all positions
+    ldx #NTREES-1
+at_move:
+    inc t_row,x
+    lda t_col,x
+    cmp #20
+    bcs at_mright
+    ; left side: move one column left
+    lda t_col,x
+    beq at_mresp
+    dec t_col,x
+    jmp at_mcheck
+at_mright:
+    ; right side: move one column right
+    lda t_col,x
+    cmp #37
+    bcs at_mresp
+    inc t_col,x
+at_mcheck:
+    lda t_row,x
+    cmp #23
+    bcc at_mnext
+at_mresp:
+    ; respawn near the horizon
+    lda t_col,x
+    cmp #20
+    bcs at_mrespr
+    ; left side: random col 10-13
+    jsr rand8
+    and #3
+    clc
+    adc #10
+    sta t_col,x
+    jmp at_mresprow
+at_mrespr:
+    ; right side: random col 24-27
+    jsr rand8
+    and #3
+    clc
+    adc #24
+    sta t_col,x
+at_mresprow:
+    jsr rand8
+    and #1
+    clc
+    adc #7
+    sta t_row,x
+at_mnext:
+    dex
+    bpl at_move
+
+    ; Phase 3: redraw all trees at new positions
+    ldx #NTREES-1
+at_draw:
+    stx at_idx
+    lda t_row,x
+    sta trow
+    lda t_col,x
+    sta tcol
+    jsr draw_tree
+    ldx at_idx
+    dex
+    bpl at_draw
+at_done:
+    rts
+
 ; ---- score: bump the decimal digits and the difficulty byte ----
 add_score:
     lda score8
@@ -378,6 +484,12 @@ lcnt:        !byte 0     ; held-direction counters for the auto-repeat
 rcnt:        !byte 0
 p2lcnt:      !byte 0     ; the same for player 2's steering
 p2rcnt:      !byte 0
+
+; ---- dynamic tree state ----
+t_row:      !fill NTREES, 0  ; current row of each tree
+t_col:      !fill NTREES, 0  ; current column of each tree
+tree_timer: !byte 0           ; frames since last tree scroll
+at_idx:     !byte 0           ; animate_trees loop index
 
 ; ---- rabbit slots (hardware sprites 1-7) ----
 r_act:  !fill NRABBITS, 0

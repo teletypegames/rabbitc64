@@ -45,3 +45,9 @@ sprxreg:
 ; rabbit slot -> sprite enable/MSB/expand bit
 sprbit:
     !byte 2, 4, 8, 16, 32, 64, 128
+
+; road edge offset per row (0-18): perspective curve
+; wider at the horizon (offset 2) so it looks like a real road,
+; not a sharp pyramid; only delta 0/1 steps, no visible jumps
+road_off:
+    !byte 2, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 17, 18

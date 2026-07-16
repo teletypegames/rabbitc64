@@ -82,18 +82,19 @@ road_row:
     adc #6               ; road runs from char row 6 to row 24
     tax
     jsr row_ptr
-    lda #19              ; left edge: one column left per row
+    ldx drtmp            ; use perspective curve for the edge offset
+    lda #19
     sec
-    sbc drtmp
+    sbc road_off,x
     tay
     sty drleft
     lda #$4e             ; '/' diagonal
     sta (scrlo),y
     lda #COL_EDGE
     sta (collo),y
-    lda #20              ; right edge: one column right per row
+    lda #20
     clc
-    adc drtmp
+    adc road_off,x
     tay
     lda #$4d             ; '\' diagonal
     sta (scrlo),y
@@ -158,6 +159,33 @@ draw_tree:
     sta (collo),y
     rts
 
+; ---- erase one tree (write spaces at trow/tcol positions) ----
+erase_tree:
+    ldx trow
+    dex
+    jsr row_ptr
+    ldy tcol
+    iny
+    lda #$20
+    sta (scrlo),y
+    ldx trow
+    jsr row_ptr
+    ldy tcol
+    lda #$20
+    sta (scrlo),y
+    iny
+    sta (scrlo),y
+    iny
+    sta (scrlo),y
+    ldx trow
+    inx
+    jsr row_ptr
+    ldy tcol
+    iny
+    lda #$20
+    sta (scrlo),y
+    rts
+
 tree_ball:
     lda #$51             ; foliage ball
     sta (scrlo),y
@@ -165,11 +193,10 @@ tree_ball:
     sta (collo),y
     rts
 
-NTREES = 6
 tree_tbl:                ; middle row, left column - far trees sit
     !byte  9,  4         ;   higher and closer to the road
     !byte 14,  6
-    !byte 19,  3
+    !byte 18,  2
     !byte  8, 31
     !byte 12, 34
     !byte 17, 36

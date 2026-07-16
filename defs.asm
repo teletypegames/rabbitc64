@@ -63,6 +63,8 @@ T_BIG     = 112          ; rabbit distance where the big frames start
 T_EXP     = 192          ; ... and where the sprite gets double-sized
 REP_HOLD  = 12           ; frames before a held direction auto-repeats
 REP_PERIOD = 6           ; frames between auto-repeat steps
+TREE_SPEED = 3           ; frames between tree scroll steps
+NTREES    = 6            ; roadside trees per side-pair
 RAS_SYNC  = 251          ; raster line polled for the frame sync
 RAS_SPLIT = 97           ; horizon line: sky/grass background split
 

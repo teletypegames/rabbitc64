@@ -102,8 +102,14 @@ play_update:
     sta lcnt
 pu_lmove:
     lda player_lane
-    beq pu_lend
+    beq pu_loff          ; leftmost lane: that's the grass
     dec player_lane
+    jmp pu_lend
+pu_loff:
+    lda lcnt             ; only a fresh press costs a miss,
+    cmp #1               ; a held direction doesn't chain them
+    bne pu_lend
+    jsr add_miss
     jmp pu_lend
 pu_lrel:
     lda #0
@@ -125,8 +131,14 @@ pu_lend:
 pu_rmove:
     lda player_lane
     cmp #LANES-1
-    beq pu_rend
+    beq pu_roff          ; rightmost lane: grass on this side too
     inc player_lane
+    jmp pu_rend
+pu_roff:
+    lda rcnt
+    cmp #1
+    bne pu_rend
+    jsr add_miss
     jmp pu_rend
 pu_rrel:
     lda #0
